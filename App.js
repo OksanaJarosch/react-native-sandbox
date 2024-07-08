@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, FlatList, RefreshControl } from 'react-native';
+import { StyleSheet, View, FlatList, RefreshControl, ActivityIndicator, Text, SafeAreaView } from 'react-native';
 import axios from "axios";
 import { useEffect, useState } from 'react';
 import { Article } from './components/Article';
@@ -8,47 +8,62 @@ import { Article } from './components/Article';
 export default function App() {
 
   const [items, setItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   
-  const fethPosts = () => {
+  const fetchPosts = () => {
+    setIsLoading(true);
+
     axios.get("https://656fb2c96529ec1c62382546.mockapi.io/contacts/articles")
-    .then((resp) => {
-      setItems(resp.data);
-    })
-    .catch(err => {
-      console.log(err);
-    })
+      .then((resp) => {
+        setItems(resp.data);
+      })
+      .catch(err => {
+        console.log(err);
+      })
+      .finally(() => setIsLoading(false));
   };
 
   useEffect(() => {
-    fethPosts()
+    fetchPosts()
   }, []);
 
   return (
-    <View style={styles.container}>
-      <FlatList 
-        refreshControl={<RefreshControl refreshing={""} onRefresh={fethPosts} />}
-        data={items}
-        renderItem={({ item }) =>
-          <Article
-            title={item.title}
-            text={item.text}
-            createdAt={item.createdAt}
-            imageUrl={item.imageUrl}
-          />
-        }
-        keyExtractor={(item) => item.id.toString()}
-      />
+    <SafeAreaView style={styles.container}>
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" />
+          <Text>Loading...</Text>
+        </View>
+
+      ) : (
+        <FlatList 
+          refreshControl={<RefreshControl refreshing={isLoading} onRefresh={fetchPosts} />}
+          data={items}
+          renderItem={({ item }) =>
+            <Article
+              title={item.title}
+              text={item.text}
+              createdAt={item.createdAt}
+              imageUrl={item.imageUrl}
+            />
+          }
+          keyExtractor={(item) => item.id.toString()}
+        />
+      )}
       <StatusBar style="auto" />
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexWrap: "wrap",
+    flex: 1,
     gap: 16,
-    alignItems: 'flex-start',
-    marginTop: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: 16,
+  },
+  loadingContainer: {
+    gap: 10,
   },
 });
