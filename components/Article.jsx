@@ -1,14 +1,25 @@
 import { Image, StyleSheet, Text, View } from 'react-native';
 
-export const Article = ({title, createdAt, imageUrl, text, full}) => {
+export const Article = ({ title, createdAt, imageUrl, text, full }) => {
+    
+    const truncateTitle = (str) => {
+        if (str.length > 40) {
+            return str.substring(0, 41) + "...";
+        }
+        return str;
+    };
+
+    const articleDate = new Date(createdAt).toLocaleDateString();
+
     return (
         <View>
             {full ? (
                 <View style={articleStyles.fullContainer}>
+                    <Text style={articleStyles.postTitle}>{title}</Text>
                     <Image style={articleStyles.fullImage}
                         source={{ uri: imageUrl }} />
                     <Text>{text}</Text>
-                    <Text style={articleStyles.postDate}>{createdAt}</Text>
+                    <Text style={articleStyles.postDate}>{articleDate}</Text>
                 </View>
                 
             ) : (
@@ -16,8 +27,8 @@ export const Article = ({title, createdAt, imageUrl, text, full}) => {
                     <Image style={articleStyles.image}
                         source={{uri: imageUrl}} />
                     <View style={articleStyles.detailsContainer}>
-                        <Text style={articleStyles.postTitle}>{title}</Text>
-                        <Text style={articleStyles.postDate}>{createdAt}</Text>
+                        <Text style={articleStyles.postTitle}>{truncateTitle(title)}</Text>
+                        <Text style={articleStyles.postDate}>{articleDate}</Text>
                     </View>
                 </View>
             )}
